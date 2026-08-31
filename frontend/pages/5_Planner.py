@@ -279,7 +279,7 @@ else:
                 f"✅ Plan zapisany: **{ts}** · "
                 f"zaplanowano {raport['zaplanowane']} ZP · "
                 f"niezaplanowanych {raport['niezaplanowane']} · "
-                f"zonków {n_zonk}"
+                f"przeciążeń zdolności {n_zonk}"
             )
             if raport["niezaplanowane_zp"]:
                 with st.expander("📋 Niezaplanowane zlecenia"):
@@ -333,31 +333,32 @@ if sel_pg != "Wszystkie":
 st.caption(f"Segmentów: **{len(df)}** | Maszyn: **{df['Maszyna'].nunique()}**")
 st.markdown("---")
 
-# ── Zonki ──────────────────────────────────────────────────────────────────────
+# ── Przeciążenia zdolności (zonki) ────────────────────────────────────────────
 if not zonki_df.empty:
     _z_total_min = float(zonki_df["zonk_min"].sum())
     _z_total_mb  = float(zonki_df["zonk_MB"].sum())
     _z_total_zp  = int(zonki_df["zonk_ZP"].sum())
     _z_n         = len(zonki_df)
 
+    st.markdown("##### 🔴 Przeciążenie zdolności (praca poza zmianą)")
     _zc1, _zc2, _zc3, _zc4 = st.columns(4)
-    _zc1.metric("🔴 Maszyno-dni z zonkiem", f"{_z_n}")
-    _zc2.metric("⏱ Łącznie min poza 22:00", f"{_z_total_min:,.0f}")
-    _zc3.metric("📦 MB w zonku",            f"{_z_total_mb:,.1f}")
-    _zc4.metric("🔢 ZP w zonku",            f"{_z_total_zp}")
+    _zc1.metric("Maszyno-dni z przeciążeniem", f"{_z_n}")
+    _zc2.metric("⏱ Minuty poza 22:00",         f"{_z_total_min:,.0f}")
+    _zc3.metric("📦 MB poza zmianą",           f"{_z_total_mb:,.1f}")
+    _zc4.metric("🔢 ZP poza zmianą",           f"{_z_total_zp}")
 
-    with st.expander(f"📋 Szczegóły zonków ({_z_n} maszyno-dni)", expanded=True):
+    with st.expander(f"📋 Szczegóły przeciążeń ({_z_n} maszyno-dni)", expanded=True):
         st.dataframe(
             zonki_df.sort_values(["Data", "Maszyna"]),
             use_container_width=True, hide_index=True,
             column_config={
                 "zonk_min": st.column_config.NumberColumn("Min poza 22:00", format="%.0f"),
-                "zonk_MB":  st.column_config.NumberColumn("MB w zonku", format="%.1f"),
-                "zonk_ZP":  st.column_config.NumberColumn("ZP w zonku", format="%d"),
+                "zonk_MB":  st.column_config.NumberColumn("MB poza zmianą", format="%.1f"),
+                "zonk_ZP":  st.column_config.NumberColumn("ZP poza zmianą", format="%d"),
             },
         )
 else:
-    st.success("✅ Brak zonków w tym planie.")
+    st.success("✅ Brak przeciążeń zdolności w tym planie.")
 
 st.markdown("---")
 
@@ -483,8 +484,8 @@ if _bez_kat:
 # ── Legenda RAL ────────────────────────────────────────────────────────────────
 with st.expander("🎨 Legenda kolorów"):
     items = [
-        ("przezbrojenie", SETUP_COLOR, "⚙️ Przezbrojenie"),
-        ("konflikt_suwnicy", CRANE_CONFLICT_COLOR, "🛑 Konflikt suwnicy"),
+        ("przezbrojenie", SETUP_COLOR, "⚙️ Przezbrojenie (SMED)"),
+        ("konflikt_suwnicy", CRANE_CONFLICT_COLOR, "🛑 Oczekiwanie na suwnicę"),
         ("wew", WEW_COLOR, "💗 Zlec. wewnętrzne"),
     ] + [
         (k,
@@ -605,8 +606,15 @@ crane_conflict = df[df["kolor_id"] == "konflikt_suwnicy"]
 summ   = prod.groupby("Maszyna").agg(ZP=("ZP","count"), MB=("MB","sum"), Prod_min=("Minuty","sum")).reset_index()
 s_sum  = setup.groupby("Maszyna").agg(Setup_min=("Minuty","sum"), Przezbr=("ZP","count")).reset_index()
 summ   = summ.merge(s_sum, on="Maszyna", how="left").fillna(0)
-summ["Razem (min)"]  = (summ["Prod_min"] + summ["Setup_min"]).round(1)
-summ["Wykorz. %"]    = (summ["Razem (min)"] / 960 * 100).round(1)
+summ["Obciążenie (min)"]      = (summ["Prod_min"] + summ["Setup_min"]).round(1)
+summ["Obciążenie zdolności %"] = (summ["Obciążenie (min)"] / 960 * 100).round(1)
+# KPI SMED: średni czas pojedynczego przezbrojenia i udział przezbrojeń w obciążeniu
+summ["Śr. przezbrojenie (min)"] = (
+    summ["Setup_min"] / summ["Przezbr"].replace(0, pd.NA)
+).fillna(0).round(1)
+summ["Udział przezbrojeń %"] = (
+    summ["Setup_min"] / summ["Obciążenie (min)"].replace(0, pd.NA) * 100
+).fillna(0).round(1)
 summ["MB"]           = summ["MB"].round(1)
 summ["Prod_min"]     = summ["Prod_min"].round(1)
 summ["Setup_min"]    = summ["Setup_min"].round(1)
@@ -629,14 +637,29 @@ if "is_wew" in df.columns:
 else:
     summ["MB wew"] = 0.0
 
-# Konflikt suwnicy per maszyna (mid-day idle czekający na suwnicę)
+# Oczekiwanie na suwnicę per maszyna (mid-day idle — strata dostępności)
 _conflict_per_m = (
-    crane_conflict.groupby("Maszyna")["Minuty"].sum().reset_index(name="Konflikt suwnicy (min)")
+    crane_conflict.groupby("Maszyna")["Minuty"].sum().reset_index(name="Oczekiwanie na suwnicę (min)")
     if not crane_conflict.empty
-    else pd.DataFrame(columns=["Maszyna", "Konflikt suwnicy (min)"])
+    else pd.DataFrame(columns=["Maszyna", "Oczekiwanie na suwnicę (min)"])
 )
 summ = summ.merge(_conflict_per_m, on="Maszyna", how="left").fillna(0)
-summ["Konflikt suwnicy (min)"] = summ["Konflikt suwnicy (min)"].round(1)
+summ["Oczekiwanie na suwnicę (min)"] = summ["Oczekiwanie na suwnicę (min)"].round(1)
+summ = summ.rename(columns={
+    "ZP": "Liczba ZP",
+    "Prod_min": "Czas pracy (min)",
+    "Setup_min": "Przezbrojenia (min)",
+    "Przezbr": "Liczba przezbrojeń",
+})
+_summ_cols = [
+    "Maszyna", "Liczba ZP", "MB",
+    "Czas pracy (min)",
+    "Przezbrojenia (min)", "Liczba przezbrojeń",
+    "Śr. przezbrojenie (min)", "Udział przezbrojeń %",
+    "Obciążenie (min)", "Obciążenie zdolności %",
+    "MB Filc", "MB wew",
+    "Oczekiwanie na suwnicę (min)",
+]
 if "is_zonk" in df.columns:
     _zonk_per_m = (
         df[df["is_zonk"] == True]
@@ -647,10 +670,15 @@ if "is_zonk" in df.columns:
     summ = summ.merge(_zonk_per_m, on="Maszyna", how="left").fillna(0)
     summ["zonk_zp"]  = summ["zonk_zp"].astype(int)
     summ["zonk_min"] = summ["zonk_min"].round(1)
-    summ.columns = ["Maszyna","Liczba ZP","MB","Prod. (min)","Setup (min)","Przezbr.","Razem (min)","Wykorz. %","MB Filc","MB wew","Konflikt suwnicy (min)","Zonk (ZP)","Zonk (min)"]
-else:
-    summ.columns = ["Maszyna","Liczba ZP","MB","Prod. (min)","Setup (min)","Przezbr.","Razem (min)","Wykorz. %","MB Filc","MB wew","Konflikt suwnicy (min)"]
+    summ = summ.rename(columns={"zonk_zp": "Poza zmianą (ZP)", "zonk_min": "Poza zmianą (min)"})
+    _summ_cols += ["Poza zmianą (ZP)", "Poza zmianą (min)"]
+summ = summ[_summ_cols]
 st.dataframe(summ, use_container_width=True, hide_index=True)
+st.caption(
+    "⚙️ SMED: **Śr. przezbrojenie** i **Udział przezbrojeń** to wskaźniki redukcji czasów "
+    "przezbrojeń. **Obciążenie zdolności** = (czas pracy + przezbrojenia) / 960 min (2 zmiany). "
+    "**Oczekiwanie na suwnicę** i **praca poza zmianą** to planowane straty dostępności."
+)
 
 st.markdown("---")
 
@@ -674,15 +702,21 @@ def _build_summ(df_src: pd.DataFrame) -> pd.DataFrame:
     s = prod.groupby(["Data","Maszyna"]).agg(ZP=("ZP","count"), MB=("MB","sum"), Prod_min=("Minuty","sum")).reset_index()
     ss = setup.groupby(["Data","Maszyna"]).agg(Setup_min=("Minuty","sum"), Przezbr=("ZP","count")).reset_index()
     s = s.merge(ss, on=["Data","Maszyna"], how="left").fillna(0)
-    s["Razem (min)"] = (s["Prod_min"] + s["Setup_min"]).round(1)
-    s["Wykorz. %"]   = (s["Razem (min)"] / 960 * 100).round(1)
+    s["Obciążenie (min)"]       = (s["Prod_min"] + s["Setup_min"]).round(1)
+    s["Obciążenie zdolności %"] = (s["Obciążenie (min)"] / 960 * 100).round(1)
+    s["Śr. przezbrojenie (min)"] = (
+        s["Setup_min"] / s["Przezbr"].replace(0, pd.NA)
+    ).fillna(0).round(1)
+    s["Udział przezbrojeń %"] = (
+        s["Setup_min"] / s["Obciążenie (min)"].replace(0, pd.NA) * 100
+    ).fillna(0).round(1)
     s["MB"]          = s["MB"].round(1)
     s["Prod_min"]    = s["Prod_min"].round(1)
     s["Setup_min"]   = s["Setup_min"].round(1)
     s["Przezbr"]     = s["Przezbr"].astype(int)
     return s.rename(columns={
-        "ZP": "Liczba ZP", "Prod_min": "Prod. (min)",
-        "Setup_min": "Setup (min)", "Przezbr": "Przezbr.",
+        "ZP": "Liczba ZP", "Prod_min": "Czas pracy (min)",
+        "Setup_min": "Przezbrojenia (min)", "Przezbr": "Liczba przezbrojeń",
     }).sort_values(["Data","Maszyna"])
 
 def to_excel(df_detail: pd.DataFrame, df_summ: pd.DataFrame) -> bytes:

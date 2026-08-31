@@ -28,7 +28,7 @@ st.markdown("---")
 
 # --- Tabela edycji parametrów ---
 st.subheader("Parametry maszyn")
-st.caption("Uzupełnij prędkość, limit dzienny i czas przezbrojenia dla każdej maszyny.")
+st.caption("Uzupełnij prędkość, limit dzienny i czas przezbrojenia (SMED) dla każdej maszyny.")
 
 df_edit = pd.DataFrame([
     {
@@ -52,7 +52,9 @@ edited = st.data_editor(
             "Limit dzienny (min)", min_value=0, step=10, format="%d"
         ),
         "Czas przezbrojenia (min)": st.column_config.NumberColumn(
-            "Czas przezbrojenia (min)", min_value=0, step=1, format="%d"
+            "Przezbrojenie SMED (min)", min_value=0, step=1, format="%d",
+            help="Czas przezbrojenia przy zmianie katalogu (zmiana coilu, wymaga suwnicy). "
+                 "To jest czas, który redukuje się metodą SMED.",
         ),
         "Przystawka Filc": st.column_config.CheckboxColumn(
             "Przystawka Filc",
