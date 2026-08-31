@@ -1,0 +1,493 @@
+"""
+Silnik planowania produkcji — V3 (auto-przypisanie operatorów)
+
+Operatorzy są auto-przypisywani do maszyn wg obciążenia (najbardziej zajęta
+maszyna dostaje operatora pierwsza). Round-robin jeśli operatorów więcej niż 1.
+"""
+from __future__ import annotations
+
+import re
+from datetime import date, datetime, timedelta
+
+import pandas as pd
+
+
+# ── Stałe ─────────────────────────────────────────────────────────────────────
+
+SHIFT_1 = (6 * 60, 14 * 60)    # minuty od północy
+SHIFT_2 = (14 * 60, 22 * 60)
+TRANSIT_MIN = 20.0
+TRANSIT_COLOR = "przejscie"
+SETUP_COLOR   = "przezbrojenie"
+
+
+# ── Helpers katalog ───────────────────────────────────────────────────────────
+
+def _katalog_base(kat: str) -> str:
+    return kat[:-1] if kat and kat[-1] in ("D", "E") else kat
+
+def _katalog_typ(kat: str) -> str:
+    return kat[-1] if kat and kat[-1] in ("D", "E") else "D"
+
+def _has_filc(katalog: str) -> bool:
+    return "F" in _katalog_base(katalog)
+
+def _oblicz_przezbrojenie(
+    prev: str | None, curr: str, std_min: float, ma_przystawke: bool = False
+) -> float:
+    if prev is None: return std_min
+    if prev == curr: return 0.0
+    prev_cmp = _katalog_base(prev).replace("F", "") if ma_przystawke else _katalog_base(prev)
+    curr_cmp = _katalog_base(curr).replace("F", "") if ma_przystawke else _katalog_base(curr)
+    if prev_cmp == curr_cmp:
+        return 6.0 if _katalog_typ(prev) != _katalog_typ(curr) else 0.0
+    return float(std_min)
+
+def _extract_ral(katalog: str) -> str:
+    m = re.search(r"\d{4}", katalog)
+    return m.group() if m else ""
+
+
+# ── Helpers zmiana / operator ─────────────────────────────────────────────────
+
+def _norm_zaklad(s: str) -> str:
+    return (s.lower()
+            .replace("ę","e").replace("ó","o").replace("ś","s")
+            .replace("ą","a").replace("ź","z").replace("ż","z")
+            .replace("ń","n").replace("ć","c").replace("ł","l").strip())
+
+def get_operator_shift(op: dict, day: date, A_week_start: date) -> int:
+    """Zwraca 1 lub 2 (numer zmiany) dla operatora w danym dniu."""
+    weeks = (day - A_week_start).days // 7
+    a_on_first = (weeks % 2 == 0)
+    return (1 if a_on_first else 2) if op.get("shift_group","A") == "A" else (2 if a_on_first else 1)
+
+def _is_vacation(name: str, day: date, vacations: dict) -> bool:
+    return day.isoformat() in vacations.get(name, [])
+
+
+# ── Obciążenie maszyn ─────────────────────────────────────────────────────────
+
+def _machine_workload(
+    planowalne: pd.DataFrame,
+    maszyny_dict: dict,
+    day: date,
+    lookahead: int,
+    planned: set[str],
+) -> dict[str, float]:
+    """Zwraca {maszyna: szacowane_minuty_pracy} dla kandydatów w oknie lookahead."""
+    end = day + timedelta(days=lookahead)
+    result = {}
+    for nazwa, m in maszyny_dict.items():
+        v = float(m.get("predkosc_mb_min", 0) or 0)
+        if v <= 0:
+            result[nazwa] = 0.0
+            continue
+        kand = planowalne[
+            (planowalne["maszyna"] == nazwa) &
+            (planowalne["LD_date"].dt.date <= end) &
+            (~planowalne["Numer_zlecenia"].isin(planned))
+        ]
+        result[nazwa] = float(kand["Ilosc_MBSZT_num"].sum()) / v if not kand.empty else 0.0
+    return result
+
+
+def _auto_assign(available_ops: list[dict], machines_by_load: list[str]) -> dict[str, list[str]]:
+    """
+    Round-robin: maszyna #0 → op[0], #1 → op[1], ..., #N → op[0], ...
+    Zwraca {op_name: [masz1, masz2, ...]}.
+    """
+    out: dict[str, list[str]] = {op["name"]: [] for op in available_ops}
+    n = len(available_ops)
+    for rank, masz in enumerate(machines_by_load):
+        out[available_ops[rank % n]["name"]].append(masz)
+    return out
+
+
+# ── Przypisanie maszyn do zleceń ──────────────────────────────────────────────
+
+def przypisz_maszyny(
+    df: pd.DataFrame,
+    maszyny: list[dict],
+    zaklad: str,
+) -> tuple[pd.DataFrame, list[str], dict[str, list[str]]]:
+    profil_to_maszyna: dict[str, str] = {}
+    konflikty: dict[str, list[str]] = {}
+    zaklad_n = _norm_zaklad(zaklad)
+
+    for m in maszyny:
+        if _norm_zaklad(m.get("zaklad","")) != zaklad_n:
+            continue
+        nazwa = m.get("nazwa", m.get("id",""))
+        for p in m.get("twr_profil", []):
+            if p in konflikty:
+                konflikty[p].append(nazwa)
+            elif p in profil_to_maszyna:
+                konflikty[p] = [profil_to_maszyna.pop(p), nazwa]
+            else:
+                profil_to_maszyna[p] = nazwa
+
+    df_out = df.copy()
+    df_out["maszyna"] = df_out["Twr_Profil"].map(profil_to_maszyna)
+    nieprzypisane = df_out[df_out["maszyna"].isna()]["Twr_Profil"].dropna().unique().tolist()
+    dane_profile  = set(df["Twr_Profil"].dropna().unique())
+    konflikty_ist = {p: ms for p, ms in konflikty.items() if p in dane_profile}
+    return df_out, nieprzypisane, konflikty_ist
+
+
+# ── Okno czasowe: plan_window ─────────────────────────────────────────────────
+
+def _plan_window(
+    kand_masz: pd.DataFrame,
+    machine: dict,
+    day: date,
+    day_dt: datetime,           # midnight tego dnia
+    cursor_min: float,          # start (minuty od północy)
+    window_end_min: float,      # koniec (minuty od północy)
+    lookahead_end: date,
+    last_kat: str | None,
+    planned: set[str],
+    gantt_rows: list[dict],
+    ma_przystawke: bool = False,
+) -> tuple[float, str | None]:
+    """Planuje zlecenia w oknie [cursor_min, window_end_min]. Zwraca (nowy_cursor, last_kat)."""
+    predkosc  = float(machine.get("predkosc_mb_min", 0) or 0)
+    std_przezb = float(machine.get("czas_przezbrojenia_min", 12) or 12)
+    nazwa     = machine.get("nazwa", machine.get("id",""))
+
+    if predkosc <= 0:
+        return cursor_min, last_kat
+
+    kand = kand_masz[
+        (kand_masz["LD_date"].dt.date <= lookahead_end) &
+        (~kand_masz["Numer_zlecenia"].isin(planned))
+    ]
+    if kand.empty:
+        return cursor_min, last_kat
+
+    min_ld_per_kat = kand.groupby("Twr_Katalog")["LD_date"].min().sort_values()
+    offset = 0.0   # minuty zużyte w tym oknie
+
+    for katalog in min_ld_per_kat.index:
+        przezb    = _oblicz_przezbrojenie(last_kat, katalog, std_przezb, ma_przystawke)
+        dostepne  = window_end_min - cursor_min - offset
+
+        if przezb > dostepne:
+            break
+
+        if przezb > 0:
+            ps = day_dt + timedelta(minutes=cursor_min + offset)
+            pe = day_dt + timedelta(minutes=cursor_min + offset + przezb)
+            gantt_rows.append({
+                "Maszyna": nazwa, "Twr_Profil_Glowny": "",
+                "Data": day.isoformat(), "Start": ps, "Koniec": pe,
+                "ZP": "— Przezbrojenie —", "Twr_Katalog": katalog,
+                "RAL": _extract_ral(katalog),
+                "MB": 0.0, "Minuty": round(przezb, 1),
+                "LD": "—", "Total_kat_min": 0.0,
+                "kolor_id": SETUP_COLOR, "spoznienie": False,
+            })
+            offset  += przezb
+            last_kat = katalog
+
+        blok = kand[
+            (kand["Twr_Katalog"] == katalog) &
+            (~kand["Numer_zlecenia"].isin(planned))
+        ].sort_values("LD_date")
+
+        ral       = _extract_ral(katalog)
+        kat_total = round(blok["Ilosc_MBSZT_num"].sum() / predkosc, 1)
+
+        for _, zp in blok.iterrows():
+            if str(zp["Numer_zlecenia"]) in planned:
+                continue
+            mb      = float(zp["Ilosc_MBSZT_num"])
+            czas_zp = mb / predkosc
+            dostepne = window_end_min - cursor_min - offset
+
+            if czas_zp > dostepne:
+                if offset == 0 or (offset == przezb):   # W1: jedyne zlecenie → planuj
+                    pass
+                else:
+                    break
+
+            ld_date = zp["LD_date"].date()
+            pg = str(zp["Twr_Profil_Glowny"]) if "Twr_Profil_Glowny" in zp.index and pd.notna(zp["Twr_Profil_Glowny"]) else ""
+
+            zs = day_dt + timedelta(minutes=cursor_min + offset)
+            ze = day_dt + timedelta(minutes=cursor_min + offset + czas_zp)
+            gantt_rows.append({
+                "Maszyna": nazwa, "Twr_Profil_Glowny": pg,
+                "Data": day.isoformat(), "Start": zs, "Koniec": ze,
+                "ZP": str(zp["Numer_zlecenia"]),
+                "Twr_Katalog": katalog, "RAL": ral,
+                "MB": round(mb, 3), "Minuty": round(czas_zp, 2),
+                "LD": ld_date.isoformat(),
+                "Total_kat_min": kat_total,
+                "kolor_id": ral + "_F" if _has_filc(katalog) else ral,
+                "spoznienie": day > ld_date,
+            })
+            offset  += czas_zp
+            last_kat = katalog
+            planned.add(str(zp["Numer_zlecenia"]))
+
+    return cursor_min + offset, last_kat
+
+
+# ── Główny algorytm ───────────────────────────────────────────────────────────
+
+_GANTT_COLS = [
+    "Maszyna","Twr_Profil_Glowny","Data","Start","Koniec",
+    "ZP","Twr_Katalog","RAL","MB","Minuty","LD",
+    "Total_kat_min","kolor_id","spoznienie",
+]
+
+def planuj(
+    df: pd.DataFrame,
+    maszyny: list[dict],
+    kalendarz: dict[str, int],
+    operators: list[dict],
+    shift_config: dict,
+    operator_vacations: dict,
+    data_start: date,
+    horyzont: int,
+    lookahead: int,
+) -> tuple[pd.DataFrame, dict]:
+    """
+    Główna funkcja planowania z auto-przypisaniem operatorów.
+
+    Operatorzy → auto-przypisanie do maszyn round-robin od najbardziej
+    obciążonej. Bez operatorów (lub gdy żaden nie skonfigurowany) → fallback
+    do planowania czysto maszynowego.
+    """
+    A_week_start = date.fromisoformat(
+        shift_config.get("A_first_shift_week", str(data_start))
+    )
+
+    maszyny_dict: dict[str, dict] = {
+        m.get("nazwa", m.get("id","")): m for m in maszyny
+    }
+
+    planowalne = df[df["maszyna"].notna() & (df["Ilosc_MBSZT_num"] > 0)].copy()
+    gantt_rows: list[dict] = []
+    planned:    set[str]   = set()
+    last_kat:   dict[str, str | None] = {}   # {maszyna: last_katalog}
+
+    use_operators = bool(operators)
+
+    for offset in range(horyzont):
+        day    = data_start + timedelta(days=offset)
+        cal_min = float(kalendarz.get(day.isoformat(), 0))
+        if cal_min == 0:
+            continue   # dzień wolny — last_kat NIE resetuje się
+
+        day_dt = datetime(day.year, day.month, day.day, 0, 0)
+
+        for shift_num, (sh_start, sh_end) in [(1, SHIFT_1), (2, SHIFT_2)]:
+            if shift_num == 2 and cal_min < 960:
+                continue  # tylko 1 zmiana tego dnia
+
+            if use_operators:
+                dostepni = [
+                    op for op in operators
+                    if get_operator_shift(op, day, A_week_start) == shift_num
+                    and not _is_vacation(op["name"], day, operator_vacations)
+                ]
+                if not dostepni:
+                    continue
+
+                # Obciążenie maszyn → sortuj malejąco
+                workload = _machine_workload(planowalne, maszyny_dict, day, lookahead, planned)
+                machines_by_load = [
+                    m for m, w in sorted(workload.items(), key=lambda x: -x[1]) if w > 0
+                ]
+                if not machines_by_load:
+                    continue
+
+                assignments = _auto_assign(dostepni, machines_by_load)
+
+                for op in dostepni:
+                    cursor     = float(sh_start)
+                    prev_masz  = None
+
+                    for masz_name in assignments[op["name"]]:
+                        if masz_name not in maszyny_dict:
+                            continue
+
+                        # Przejście między maszynami
+                        if prev_masz is not None:
+                            if cursor + TRANSIT_MIN >= sh_end:
+                                break
+                            ts = day_dt + timedelta(minutes=cursor)
+                            te = day_dt + timedelta(minutes=cursor + TRANSIT_MIN)
+                            gantt_rows.append({
+                                "Maszyna": masz_name, "Twr_Profil_Glowny": "",
+                                "Data": day.isoformat(), "Start": ts, "Koniec": te,
+                                "ZP": f"— Przejście ({op['name']}) —",
+                                "Twr_Katalog": "", "RAL": "",
+                                "MB": 0.0, "Minuty": TRANSIT_MIN,
+                                "LD": "—", "Total_kat_min": 0.0,
+                                "kolor_id": TRANSIT_COLOR, "spoznienie": False,
+                            })
+                            cursor += TRANSIT_MIN
+
+                        if cursor >= sh_end:
+                            break
+
+                        kand_masz   = planowalne[planowalne["maszyna"] == masz_name]
+                        lookahead_e = day + timedelta(days=lookahead)
+                        _ma_przyst  = bool(maszyny_dict[masz_name].get("ma_przystawke_filcu", False))
+
+                        cursor, new_kat = _plan_window(
+                            kand_masz, maszyny_dict[masz_name], day, day_dt,
+                            cursor, float(sh_end), lookahead_e,
+                            last_kat.get(masz_name), planned, gantt_rows,
+                            ma_przystawke=_ma_przyst,
+                        )
+                        last_kat[masz_name] = new_kat
+                        prev_masz = masz_name
+
+            else:
+                # ── Fallback: brak operatorów → plan per maszyna ──────────────
+                for masz_name, machine in maszyny_dict.items():
+                    machine_limit = float(machine.get("limit_dzienny_min", 960) or 960)
+                    w_start = float(sh_start)
+                    w_end   = min(float(sh_end), w_start + machine_limit)
+
+                    kand_masz   = planowalne[planowalne["maszyna"] == masz_name]
+                    lookahead_e = day + timedelta(days=lookahead)
+                    _ma_przyst  = bool(machine.get("ma_przystawke_filcu", False))
+
+                    _, new_kat = _plan_window(
+                        kand_masz, machine, day, day_dt,
+                        w_start, w_end, lookahead_e,
+                        last_kat.get(masz_name), planned, gantt_rows,
+                        ma_przystawke=_ma_przyst,
+                    )
+                    last_kat[masz_name] = new_kat
+
+    # Niezaplanowane
+    wszystkie   = set(planowalne["Numer_zlecenia"].astype(str))
+    niezapl_ids = wszystkie - planned
+    niezapl_df  = planowalne[planowalne["Numer_zlecenia"].astype(str).isin(niezapl_ids)].copy()
+    niezapl_df["LD"] = niezapl_df["LD_date"].dt.date.astype(str)
+    niezapl_log = (
+        niezapl_df[["Numer_zlecenia","maszyna","Twr_Katalog","Ilosc_MBSZT_num","LD"]]
+        .rename(columns={"Ilosc_MBSZT_num":"MB"})
+        .to_dict("records")
+    )
+
+    gantt_df = (
+        pd.DataFrame(gantt_rows, columns=_GANTT_COLS)
+        if gantt_rows else pd.DataFrame(columns=_GANTT_COLS)
+    )
+    raport = {
+        "zaplanowane":    len(planned),
+        "niezaplanowane": len(niezapl_log),
+        "niezaplanowane_zp": niezapl_log,
+    }
+    return gantt_df, raport
+
+
+# ── Reorder katalogów (drag & drop) ──────────────────────────────────────────
+
+def reorder_katalogi(
+    gantt_df: pd.DataFrame,
+    maszyna: str,
+    dzien: str,
+    new_order: list[str],
+    machine_config: dict,
+) -> pd.DataFrame:
+    """
+    Przebudowuje wiersze Gantta dla danej maszyny i dnia według nowej kolejności
+    katalogów. Wiersze przejścia (transit) są zachowane bez zmian.
+    """
+    day    = date.fromisoformat(dzien)
+    day_dt = datetime(day.year, day.month, day.day, 0, 0)
+    std_przezb   = float(machine_config.get("czas_przezbrojenia_min", 12) or 12)
+    predkosc     = float(machine_config.get("predkosc_mb_min", 0) or 0)
+    nazwa        = machine_config.get("nazwa", machine_config.get("id", maszyna))
+    ma_przystawke = bool(machine_config.get("ma_przystawke_filcu", False))
+
+    mask_this  = (gantt_df["Maszyna"] == maszyna) & (gantt_df["Data"] == dzien)
+    rows_this  = gantt_df[mask_this].copy().sort_values("Start")
+    rows_other = gantt_df[~mask_this].copy()
+
+    transit_rows = rows_this[rows_this["kolor_id"] == TRANSIT_COLOR]
+
+    if not transit_rows.empty:
+        last_te = transit_rows["Koniec"].max()
+        cursor_min = (last_te - day_dt).total_seconds() / 60.0
+    elif not rows_this.empty:
+        first_min = (rows_this["Start"].min() - day_dt).total_seconds() / 60.0
+        cursor_min = float(SHIFT_1[0] if first_min < SHIFT_2[0] else SHIFT_2[0])
+    else:
+        cursor_min = float(SHIFT_1[0])
+
+    shift_end = float(SHIFT_2[1] if cursor_min >= SHIFT_2[0] else SHIFT_1[1])
+
+    prev_prod = rows_other[
+        (rows_other["Maszyna"] == maszyna) &
+        (rows_other["Data"] < dzien) &
+        (~rows_other["kolor_id"].isin([TRANSIT_COLOR, SETUP_COLOR])) &
+        (rows_other["Twr_Katalog"].notna()) &
+        (rows_other["Twr_Katalog"] != "")
+    ].sort_values("Data")
+    last_kat: str | None = prev_prod["Twr_Katalog"].iloc[-1] if not prev_prod.empty else None
+
+    prod_rows = rows_this[~rows_this["kolor_id"].isin([TRANSIT_COLOR, SETUP_COLOR])]
+
+    new_rows: list[dict] = []
+    for katalog in new_order:
+        przezb   = _oblicz_przezbrojenie(last_kat, katalog, std_przezb, ma_przystawke)
+        dostepne = shift_end - cursor_min
+
+        if przezb > dostepne:
+            break
+
+        if przezb > 0:
+            ps = day_dt + timedelta(minutes=cursor_min)
+            pe = day_dt + timedelta(minutes=cursor_min + przezb)
+            new_rows.append({
+                "Maszyna": nazwa, "Twr_Profil_Glowny": "",
+                "Data": dzien, "Start": ps, "Koniec": pe,
+                "ZP": "— Przezbrojenie —", "Twr_Katalog": katalog,
+                "RAL": _extract_ral(katalog),
+                "MB": 0.0, "Minuty": round(przezb, 1),
+                "LD": "—", "Total_kat_min": 0.0,
+                "kolor_id": SETUP_COLOR, "spoznienie": False,
+            })
+            cursor_min += przezb
+            last_kat = katalog
+
+        kat_rows = prod_rows[prod_rows["Twr_Katalog"] == katalog].sort_values("Start")
+        for _, row in kat_rows.iterrows():
+            mb      = float(row["MB"])
+            czas_zp = (mb / predkosc) if predkosc > 0 else float(row["Minuty"])
+            if czas_zp > shift_end - cursor_min:
+                break
+            zs = day_dt + timedelta(minutes=cursor_min)
+            ze = day_dt + timedelta(minutes=cursor_min + czas_zp)
+            new_rows.append({
+                "Maszyna": nazwa,
+                "Twr_Profil_Glowny": row.get("Twr_Profil_Glowny", ""),
+                "Data": dzien, "Start": zs, "Koniec": ze,
+                "ZP": row["ZP"], "Twr_Katalog": katalog,
+                "RAL": row["RAL"],
+                "MB": round(mb, 3), "Minuty": round(czas_zp, 2),
+                "LD": row["LD"],
+                "Total_kat_min": row.get("Total_kat_min", 0.0),
+                "kolor_id": row["kolor_id"],
+                "spoznienie": bool(row.get("spoznienie") or False),
+            })
+            cursor_min += czas_zp
+            last_kat = katalog
+
+    new_df     = pd.DataFrame(new_rows, columns=_GANTT_COLS) if new_rows else pd.DataFrame(columns=_GANTT_COLS)
+    transit_df = transit_rows.reindex(columns=_GANTT_COLS) if not transit_rows.empty else pd.DataFrame(columns=_GANTT_COLS)
+
+    result = pd.concat(
+        [rows_other.reindex(columns=_GANTT_COLS), transit_df, new_df],
+        ignore_index=True,
+    )
+    return result.sort_values(["Data", "Maszyna", "Start"]).reset_index(drop=True)

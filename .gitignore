@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Excel — pliki tymczasowe otwarte w Excelu
+~$*.xlsx
+~$*.xlsm
+
+# System
+.DS_Store
+Thumbs.db

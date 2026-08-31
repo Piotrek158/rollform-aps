@@ -1,0 +1,996 @@
+{
+  "machines": [
+    {
+      "id": "S Gasior",
+      "nazwa": "S Gasior",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 16.2,
+      "limit_dzienny_min": 480,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "DEKIEL",
+        "GĄSIOR BD",
+        "GĄSIOR BD PLUS",
+        "GĄSIOR GRAN",
+        "GĄSIOR PŁASKI",
+        "GĄSIOR TR",
+        "GĄSIOR TR PLUS",
+        "LISTWA PODGĄSIOROWA",
+        "ŚNIEGOŁAP"
+      ]
+    },
+    {
+      "id": "S1-ARK1",
+      "nazwa": "S1-ARK1",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 16.2,
+      "limit_dzienny_min": 480,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "PŁASKA NA WYMIAR"
+      ]
+    },
+    {
+      "id": "S1-ARK2",
+      "nazwa": "S1-ARK2",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 16.2,
+      "limit_dzienny_min": 480,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "PŁASKA NA WYMIAR"
+      ]
+    },
+    {
+      "id": "S1-ARK3",
+      "nazwa": "S1-ARK3",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 3,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "PŁASKA NA WYMIAR"
+      ]
+    },
+    {
+      "id": "S1-OBROBKA",
+      "nazwa": "S1-OBROBKA",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 3,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "OBROBKA",
+        "OKOŁOPRODUKCYJNE",
+        "PŁASKA NA WYMIAR",
+        "WSPORNIK"
+      ]
+    },
+    {
+      "id": "S1-PANEL1",
+      "nazwa": "S1-PANEL1",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 11.4,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PANEL HIGH-TECH",
+        "PANEL RETRO 25/239",
+        "PANEL RETRO 25/340",
+        "PANEL RETRO 25/554"
+      ]
+    },
+    {
+      "id": "S1-PANEL2",
+      "nazwa": "S1-PANEL2",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 8.7,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PANEL RETRO 25/239",
+        "PANEL RETRO 25/340",
+        "PANEL RETRO 25/554",
+        "PANEL RETRO 25/___"
+      ]
+    },
+    {
+      "id": "S1-PRZEWIJARKA",
+      "nazwa": "S1-PRZEWIJARKA",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 3,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PŁASKA NA WYMIAR"
+      ]
+    },
+    {
+      "id": "S1-ROZCINARKA",
+      "nazwa": "S1-ROZCINARKA",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 3,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PŁASKA NA WYMIAR"
+      ]
+    },
+    {
+      "id": "S1-SZTACHETA",
+      "nazwa": "S1-SZTACHETA",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 3,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "SZTACHETA WĄSKA"
+      ]
+    },
+    {
+      "id": "S2-DIAMENTP",
+      "nazwa": "S2-DIAMENTP",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 4,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "DIAMENT PLUS [35]"
+      ]
+    },
+    {
+      "id": "S2-GERMAN",
+      "nazwa": "S2-GERMAN",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 3.4,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "GERMAN SIMETRIC 30 [35]"
+      ]
+    },
+    {
+      "id": "S2-GERMANIA1",
+      "nazwa": "S2-GERMANIA1",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 4.2,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "GERMANIA SIMETRIC 25 [35]",
+        "GERMANIA SIMETRIC 30 [35]"
+      ]
+    },
+    {
+      "id": "S2-KINGASEP",
+      "nazwa": "S2-KINGASEP",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 6,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "KINGAS ECO PLUS [35]"
+      ]
+    },
+    {
+      "id": "S2-KUGA",
+      "nazwa": "S2-KUGA",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 2.5,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "KUGA",
+        "KUGA LINE 30 [35]"
+      ]
+    },
+    {
+      "id": "S2-T7",
+      "nazwa": "S2-T7",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 10,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T7",
+        "TRAPEZ T7 PRO"
+      ]
+    },
+    {
+      "id": "S2-T18H",
+      "nazwa": "S2-T18H",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 9.51,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T18 HYDRO"
+      ]
+    },
+    {
+      "id": "S2-T18P2",
+      "nazwa": "S2-T18P2",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 16.4,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T18 PLUS"
+      ]
+    },
+    {
+      "id": "S2-T20P",
+      "nazwa": "S2-T20P",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 16.2,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T20 PLUS"
+      ]
+    },
+    {
+      "id": "S2-T35P",
+      "nazwa": "S2-T35P",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 15.5,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T35 PLUS"
+      ]
+    },
+    {
+      "id": "S2-T50",
+      "nazwa": "S2-T50",
+      "zaklad": "Sekocin",
+      "predkosc_mb_min": 15.4,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T50"
+      ]
+    },
+    {
+      "id": "Z1-JOUANEL",
+      "nazwa": "Z1-JOUANEL",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 5.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "GĄSIOR PŁASKI",
+        "OBROBKA",
+        "PŁASKA NA WYMIAR",
+        "WSPORNIK",
+        "ŚNIEGOŁAP"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z1-PANEL1",
+      "nazwa": "Z1-PANEL1",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 8.4,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PANEL RETRO 25/239",
+        "PANEL RETRO 25/340",
+        "PANEL RETRO 25/554",
+        "PANEL RETRO 25/___"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z1-PANEL2",
+      "nazwa": "Z1-PANEL2",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 8.4,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PANEL RETRO 25/239",
+        "PANEL RETRO 25/340",
+        "PANEL RETRO 25/554",
+        "PANEL RETRO 25/___"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z1-ROZCINARKA1",
+      "nazwa": "Z1-ROZCINARKA1",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PŁASKA NA WYMIAR"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z1-ROZCINARKA2",
+      "nazwa": "Z1-ROZCINARKA2",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PŁASKA NA WYMIAR"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z1-TERRANO",
+      "nazwa": "Z1-TERRANO",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 6.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "OKOŁOPRODUKCYJNE",
+        "PANEL TERRANO 30/316",
+        "PANEL TERRANO 30/525",
+        "PANEL TERRANO IZO 30/525"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z1-TERRANO2",
+      "nazwa": "Z1-TERRANO2",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 12.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "OKOŁOPRODUKCYJNE",
+        "PANEL TERRANO 30/525",
+        "PANEL TERRANO IZO 30/525"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z1-ZAGINARKA",
+      "nazwa": "Z1-ZAGINARKA",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": null,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "DESKA OGRODZENIOWA",
+        "KROP PAS PODRYNNOWY",
+        "KROP PAS PODSUFITKOWY",
+        "LAMEL ELEWACYJNY",
+        "OBROBKA",
+        "PŁASKA NA WYMIAR",
+        "ŚNIEGOŁAP"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-ARK",
+      "nazwa": "Z2-ARK",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 2.5,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "PŁASKA NA WYMIAR"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-ARK2",
+      "nazwa": "Z2-ARK2",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 5.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "PŁASKA NA WYMIAR"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-ARK3",
+      "nazwa": "Z2-ARK3",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 9.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-DESKA_S1",
+      "nazwa": "Z2-DESKA_S1",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": null,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "SZTACHETA SZEROKA"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-DIAMENTEP",
+      "nazwa": "Z2-DIAMENTEP",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 5.5,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "DIAMENT ECO PLUS [35]",
+        "TOWARY HANDLOWE"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-ENIGMA",
+      "nazwa": "Z2-ENIGMA",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.2,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ENIGMA 30 [35]"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-ESTIMA",
+      "nazwa": "Z2-ESTIMA",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.7,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ESTIMA 35 [35]"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-GASDACH",
+      "nazwa": "Z2-GASDACH",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "GĄSIOR BD"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-GASTRAP",
+      "nazwa": "Z2-GASTRAP",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "ARKUSZE",
+        "GĄSIOR TR",
+        "GĄSIOR TR PLUS"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-GERMAN",
+      "nazwa": "Z2-GERMAN",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.7,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "GERMAN SIMETRIC 30 [35]"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-GERMANIA1",
+      "nazwa": "Z2-GERMANIA1",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 5.73,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "GERMANIA SIMETRIC 25 [35]",
+        "GERMANIA SIMETRIC 30 [35]"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-JANOSIK",
+      "nazwa": "Z2-JANOSIK",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 2.58,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "JANOSIK"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-KINGASEP",
+      "nazwa": "Z2-KINGASEP",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 6.2,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "KINGAS ECO PLUS [35]"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-PRZEWIJARKA FLIZELINA",
+      "nazwa": "Z2-PRZEWIJARKA FLIZELINA",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": null,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "PŁASKA NA WYMIAR",
+        "TOWARY HANDLOWE"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-T7",
+      "nazwa": "Z2-T7",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 8.8,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T7",
+        "TRAPEZ T7 PRO"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-T14P",
+      "nazwa": "Z2-T14P",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 13.2,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TOWARY HANDLOWE",
+        "TRAPEZ T14 PLUS"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-T18P",
+      "nazwa": "Z2-T18P",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 18.6,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T18 PLUS"
+      ],
+      "ma_przystawke_filcu": true
+    },
+    {
+      "id": "Z2-T20P",
+      "nazwa": "Z2-T20P",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 17.3,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T20 PLUS"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-T35P",
+      "nazwa": "Z2-T35P",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 16.7,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TRAPEZ T35 PLUS"
+      ],
+      "ma_przystawke_filcu": true
+    },
+    {
+      "id": "Z2-TALIA",
+      "nazwa": "Z2-TALIA",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.7,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TALIA 30 [35]",
+        "TALIA 35 [35]"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-TPANEL",
+      "nazwa": "Z2-TPANEL",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 16.0,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "T-PANEL"
+      ],
+      "ma_przystawke_filcu": false
+    },
+    {
+      "id": "Z2-TREND",
+      "nazwa": "Z2-TREND",
+      "zaklad": "Zabornia",
+      "predkosc_mb_min": 3.64,
+      "limit_dzienny_min": null,
+      "czas_przezbrojenia_min": 12,
+      "twr_profil": [
+        "TREND 30 [35]"
+      ],
+      "ma_przystawke_filcu": false
+    }
+  ],
+  "operators": [
+    {
+      "name": "Adam Nowak",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": false,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": true
+      },
+      "shift_group": "A",
+      "maszyny": []
+    },
+    {
+      "name": "Piotr Kowalski",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": false,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": true
+      },
+      "shift_group": "A",
+      "maszyny": []
+    },
+    {
+      "name": "Marek Wiśniewski",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": false,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": true
+      },
+      "shift_group": "B",
+      "maszyny": []
+    },
+    {
+      "name": "Tomasz Wójcik",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": false,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": true
+      },
+      "shift_group": "B",
+      "maszyny": []
+    },
+    {
+      "name": "Jan Kamiński",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": false,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": true
+      },
+      "shift_group": "B",
+      "maszyny": []
+    },
+    {
+      "name": "Paweł Lewandowski",
+      "shift_group": "B",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": true,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": false
+      }
+    },
+    {
+      "name": "Michał Zieliński",
+      "shift_group": "B",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": true,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": false
+      }
+    },
+    {
+      "name": "Krzysztof Szymański",
+      "shift_group": "A",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": true,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": false
+      }
+    },
+    {
+      "name": "Andrzej Dąbrowski",
+      "shift_group": "A",
+      "skills": {
+        "AKCESORIA": false,
+        "ARKUSZE": false,
+        "BLACHODACHÓWKA": true,
+        "BTR SYSTEMS": false,
+        "KROP SYSTEM RYNNY UKRYTEJ": false,
+        "OGRODZENIA": false,
+        "OKOŁOPRODUKCYJNE": false,
+        "PANELE": false,
+        "PŁASKA NA WYMIAR": false,
+        "POZOSTALE": false,
+        "REVO-SIM": false,
+        "SUROWCE": false,
+        "TOWARY HANDLOWE": false,
+        "TRAPEZY": false
+      }
+    }
+  ],
+  "skill_categories": [
+    "AKCESORIA",
+    "ARKUSZE",
+    "BLACHODACHÓWKA",
+    "BTR SYSTEMS",
+    "KROP SYSTEM RYNNY UKRYTEJ",
+    "OGRODZENIA",
+    "OKOŁOPRODUKCYJNE",
+    "PANELE",
+    "PŁASKA NA WYMIAR",
+    "POZOSTALE",
+    "REVO-SIM",
+    "SUROWCE",
+    "TOWARY HANDLOWE",
+    "TRAPEZY"
+  ],
+  "calendar": {
+    "2026-04-24": 960,
+    "2026-04-25": 0,
+    "2026-04-26": 0,
+    "2026-04-27": 960,
+    "2026-04-28": 960,
+    "2026-04-29": 960,
+    "2026-04-30": 960,
+    "2026-05-01": 0,
+    "2026-05-02": 0,
+    "2026-05-03": 0,
+    "2026-05-04": 960,
+    "2026-05-05": 960,
+    "2026-05-06": 960,
+    "2026-05-07": 960,
+    "2026-05-08": 960,
+    "2026-05-09": 0,
+    "2026-05-10": 0,
+    "2026-05-11": 960,
+    "2026-05-12": 960,
+    "2026-05-13": 960,
+    "2026-05-14": 960,
+    "2026-05-15": 960,
+    "2026-05-16": 0,
+    "2026-05-17": 0,
+    "2026-05-18": 960,
+    "2026-05-19": 960,
+    "2026-05-20": 960,
+    "2026-05-21": 960,
+    "2026-05-22": 960,
+    "2026-05-23": 0,
+    "2026-05-24": 0,
+    "2026-05-25": 960,
+    "2026-05-26": 960,
+    "2026-05-27": 960,
+    "2026-05-28": 960,
+    "2026-05-29": 960,
+    "2026-05-30": 0,
+    "2026-05-31": 0,
+    "2026-06-01": 960,
+    "2026-06-02": 960,
+    "2026-06-03": 960,
+    "2026-06-04": 960,
+    "2026-06-05": 960,
+    "2026-06-06": 0,
+    "2026-06-07": 0,
+    "2026-06-08": 960,
+    "2026-06-09": 960,
+    "2026-06-10": 960,
+    "2026-06-11": 960,
+    "2026-06-12": 960,
+    "2026-06-13": 0,
+    "2026-06-14": 0,
+    "2026-06-15": 960,
+    "2026-06-16": 960,
+    "2026-06-17": 960,
+    "2026-06-18": 960,
+    "2026-06-19": 960,
+    "2026-06-20": 0,
+    "2026-06-21": 0,
+    "2026-06-22": 960,
+    "2026-06-23": 960,
+    "2026-06-24": 960,
+    "2026-06-25": 960,
+    "2026-06-26": 960,
+    "2026-06-27": 0,
+    "2026-06-28": 0,
+    "2026-06-29": 960,
+    "2026-06-30": 960,
+    "2026-07-01": 960,
+    "2026-07-02": 960,
+    "2026-07-03": 960,
+    "2026-08-31": 960,
+    "2026-09-01": 960,
+    "2026-09-02": 960,
+    "2026-09-03": 960,
+    "2026-09-04": 960,
+    "2026-09-05": 0,
+    "2026-09-06": 0,
+    "2026-09-07": 960,
+    "2026-09-08": 960,
+    "2026-09-09": 960,
+    "2026-09-10": 960,
+    "2026-09-11": 960,
+    "2026-09-12": 0,
+    "2026-09-13": 0,
+    "2026-09-14": 960,
+    "2026-09-15": 960,
+    "2026-09-16": 960,
+    "2026-09-17": 960,
+    "2026-09-18": 960,
+    "2026-09-19": 0,
+    "2026-09-20": 0,
+    "2026-09-21": 960,
+    "2026-09-22": 960,
+    "2026-09-23": 960,
+    "2026-09-24": 960,
+    "2026-09-25": 960,
+    "2026-09-26": 0,
+    "2026-09-27": 0,
+    "2026-09-28": 960,
+    "2026-09-29": 960,
+    "2026-09-30": 960,
+    "2026-10-01": 960,
+    "2026-10-02": 960,
+    "2026-10-03": 0,
+    "2026-10-04": 0,
+    "2026-10-05": 960,
+    "2026-10-06": 960,
+    "2026-10-07": 960,
+    "2026-10-08": 960,
+    "2026-10-09": 960,
+    "2026-10-10": 0,
+    "2026-10-11": 0,
+    "2026-10-12": 960,
+    "2026-10-13": 960,
+    "2026-10-14": 960,
+    "2026-10-15": 960,
+    "2026-10-16": 960,
+    "2026-10-17": 0,
+    "2026-10-18": 0,
+    "2026-10-19": 960,
+    "2026-10-20": 960,
+    "2026-10-21": 960,
+    "2026-10-22": 960,
+    "2026-10-23": 960,
+    "2026-10-24": 0,
+    "2026-10-25": 0,
+    "2026-10-26": 960,
+    "2026-10-27": 960,
+    "2026-10-28": 960,
+    "2026-10-29": 960
+  },
+  "shift_config": {
+    "A_first_shift_week": "2026-04-27"
+  },
+  "operator_vacations": {
+    "Adam Nowak": []
+  }
+}
