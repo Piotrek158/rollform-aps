@@ -292,8 +292,10 @@ def _plan_window(
     - must_go: katalogi gdzie min(LD) ≤ nwd. Jeśli allow_overflow=True,
       mogą wystawać poza window_end (= zonk). Inaczej: zatrzymują się na window_end
       i niezaplanowane przechodzą do następnej zmiany.
-    - rolling: katalogi gdzie nwd < min(LD) ≤ nwd_next. Zawsze zatrzymują się
-      na window_end (rolling nie generuje zonka).
+    - rolling: katalogi gdzie nwd < min(LD) ≤ max(nwd_next, lookahead_end).
+      Zawsze zatrzymują się na window_end (rolling nie generuje zonka).
+    - lookahead_end ogranicza batch: do otwartego katalogu dobierane są tylko
+      ZP z LD ≤ max(nwd, lookahead_end) — dalsze zostają na kolejne dni.
 
     Zwraca (nowy_cursor, last_kat, zonk_min).
     """
@@ -320,14 +322,20 @@ def _plan_window(
         kand_wew = kand.iloc[0:0]
 
     # must_go: pilne (LD ≤ nwd) — mogą generować zonk
-    # rolling: pozostałe, posortowane po LD (najpilniejsze pierwsze) — bez zonka
+    # rolling: katalogi z nwd < min(LD) ≤ max(nwd_next, lookahead_end) — bez zonka
+    # lookahead ogranicza jak daleko w przód zasysamy robotę:
+    # - batch_bound: ZP dobierane do otwartego katalogu (batch) muszą mieć
+    #   LD ≤ max(nwd, lookahead_end) — pilne wchodzą zawsze
+    # - roll_bound: rolling pokrywa co najmniej must_go jutra (nwd_next)
+    batch_bound = max(nwd, lookahead_end)
+    roll_bound  = max(nwd_next, lookahead_end)
     if kand_zew.empty:
         must_go_kat: list[str] = []
         rolling_kat: list[str] = []
     else:
         min_ld = kand_zew.groupby("Twr_Katalog")["LD_date"].min().sort_values()
         must_go_kat = [k for k, ld in min_ld.items() if ld.date() <= nwd]
-        rolling_kat  = [k for k, ld in min_ld.items() if ld.date() > nwd]
+        rolling_kat = [k for k, ld in min_ld.items() if nwd < ld.date() <= roll_bound]
 
     cursor    = cursor_min
     zonk_min  = 0.0
@@ -461,7 +469,8 @@ def _plan_window(
 
         ral          = _extract_ral(katalog)
         blok         = kand_zew[(kand_zew["Twr_Katalog"] == katalog) &
-                          (~kand_zew["Numer_zlecenia"].isin(planned))].sort_values("LD_date")
+                          (~kand_zew["Numer_zlecenia"].isin(planned)) &
+                          (kand_zew["LD_date"].dt.date <= batch_bound)].sort_values("LD_date")
         kat_total    = round(blok["Ilosc_MBSZT_num"].sum() / predkosc, 1)
         kat_total_mb = float(blok["Ilosc_MBSZT_num"].sum())
 
@@ -501,7 +510,8 @@ def _plan_window(
 
             blok = kand_zew[
                 (kand_zew["Twr_Katalog"] == katalog) &
-                (~kand_zew["Numer_zlecenia"].isin(planned))
+                (~kand_zew["Numer_zlecenia"].isin(planned)) &
+                (kand_zew["LD_date"].dt.date <= roll_bound)
             ].sort_values("LD_date")
             if blok.empty:
                 continue

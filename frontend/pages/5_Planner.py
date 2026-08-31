@@ -229,7 +229,13 @@ else:
     pc1, pc2, pc3, pc4 = st.columns([2, 1, 1, 1])
     p_start   = pc1.date_input("Data startowa", value=date.today())
     p_horizon = pc2.number_input("Horyzont (dni)", min_value=1, max_value=120, value=14)
-    p_look    = pc3.number_input("Lookahead (dni)", min_value=0, max_value=30, value=3)
+    p_look    = pc3.number_input(
+        "Lookahead (dni)", min_value=0, max_value=30, value=3,
+        help="Jak daleko w przód zasysać zlecenia do batchy i rollingu: planowane są "
+             "tylko ZP z LD ≤ dzień + lookahead (pilne wchodzą zawsze). Większy lookahead "
+             "= większe batche i mniej przezbrojeń (SMED), ale robota z odległym LD "
+             "zajmuje moce wcześniej.",
+    )
     pc4.markdown("<br>", unsafe_allow_html=True)
     run_plan  = pc4.button("🚀 Zaplanuj", type="primary", use_container_width=True)
 
