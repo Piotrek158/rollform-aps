@@ -403,58 +403,82 @@ if "Total_kat_MB" not in df_gantt.columns:
 df_gantt["Operator"] = df_gantt["Operator"].fillna("").astype(str)
 df_gantt["Total_kat_MB"] = pd.to_numeric(df_gantt["Total_kat_MB"], errors="coerce").fillna(0.0)
 
-fig = px.timeline(
-    df_gantt.sort_values("Maszyna"),
-    x_start="Start", x_end="Koniec", y="Maszyna",
-    color="kolor_id", color_discrete_map=color_map,
-    custom_data=["ZP", "Twr_Katalog", "RAL", "MB", "Minuty", "LD", "Total_kat_min", "Operator", "Total_kat_MB"],
-)
-fig.update_traces(
-    hovertemplate=(
-        "<b>%{customdata[0]}</b><br>"
-        "──────────────────────<br>"
-        "Operator: %{customdata[7]}<br>"
-        "Katalog: %{customdata[1]}<br>"
-        "Kolor RAL: %{customdata[2]}<br>"
-        "Ilość: %{customdata[3]:.1f} MB<br>"
-        "Czas ZP: %{customdata[4]:.1f} min<br>"
-        "Batch katalogu: %{customdata[8]:.1f} MB / %{customdata[6]:.1f} min<br>"
-        "Termin LD: %{customdata[5]}<br>"
-        "<extra></extra>"
-    ),
-    marker_line_width=0.6,
-    marker_line_color="rgba(0,0,0,0.25)",
-)
-fig.update_layout(
-    xaxis=dict(
-        range=[day_start, day_end],
-        tickformat="%H:%M",
-        dtick=3_600_000,
-        title="Godzina",
-        gridcolor="#E5E5E5",
-    ),
-    yaxis=dict(title="", autorange="reversed"),
-    height=100 + df["Maszyna"].nunique() * 72,
-    plot_bgcolor="white",
-    paper_bgcolor="white",
-    showlegend=True,
-    legend_title_text="Kolor RAL",
-    margin=dict(l=130, r=20, t=10, b=50),
-    bargap=0.3,
-)
-for _tn in [k for k in color_map if k.endswith("_F") and not k.endswith("_F_Z")]:
-    fig.update_traces(
-        selector={"name": _tn},
-        marker_line_width=2.5,
-        marker_line_color="#C9A227",
+def _make_gantt(sub: pd.DataFrame):
+    fig = px.timeline(
+        sub.sort_values("Maszyna"),
+        x_start="Start", x_end="Koniec", y="Maszyna",
+        color="kolor_id", color_discrete_map=color_map,
+        custom_data=["ZP", "Twr_Katalog", "RAL", "MB", "Minuty", "LD", "Total_kat_min", "Operator", "Total_kat_MB"],
     )
-for _tn in [k for k in color_map if k.endswith("_Z")]:
     fig.update_traces(
-        selector={"name": _tn},
-        marker_line_width=3,
-        marker_line_color="#cc0000",
+        hovertemplate=(
+            "<b>%{customdata[0]}</b><br>"
+            "──────────────────────<br>"
+            "Operator: %{customdata[7]}<br>"
+            "Katalog: %{customdata[1]}<br>"
+            "Kolor RAL: %{customdata[2]}<br>"
+            "Ilość: %{customdata[3]:.1f} MB<br>"
+            "Czas ZP: %{customdata[4]:.1f} min<br>"
+            "Batch katalogu: %{customdata[8]:.1f} MB / %{customdata[6]:.1f} min<br>"
+            "Termin LD: %{customdata[5]}<br>"
+            "<extra></extra>"
+        ),
+        marker_line_width=0.6,
+        marker_line_color="rgba(0,0,0,0.25)",
     )
-st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(
+        xaxis=dict(
+            range=[day_start, day_end],
+            tickformat="%H:%M",
+            dtick=3_600_000,
+            title="Godzina",
+            gridcolor="#E5E5E5",
+        ),
+        yaxis=dict(title="", autorange="reversed"),
+        height=100 + sub["Maszyna"].nunique() * 72,
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        showlegend=True,
+        legend_title_text="Kolor RAL",
+        margin=dict(l=130, r=20, t=10, b=50),
+        bargap=0.3,
+    )
+    for _tn in [k for k in color_map if k.endswith("_F") and not k.endswith("_F_Z")]:
+        fig.update_traces(
+            selector={"name": _tn},
+            marker_line_width=2.5,
+            marker_line_color="#C9A227",
+        )
+    for _tn in [k for k in color_map if k.endswith("_Z")]:
+        fig.update_traces(
+            selector={"name": _tn},
+            marker_line_width=3,
+            marker_line_color="#cc0000",
+        )
+    return fig
+
+# Osobny gantt per Twr_Profil_Glowny — suwnica jest dzielona per (zakład, kategoria
+# główna), więc konflikty suwnicy zamykają się wewnątrz jednej kategorii i tak też
+# czytamy plan. Kategorię maszyny bierzemy z wierszy produkcyjnych całego planu
+# (setupy/konflikty mają pustą wartość, a maszyna może mieć dzień bez produkcji).
+_pg_rows = df_all[df_all["Twr_Profil_Glowny"].astype(str).str.strip() != ""]
+_masz2pg = (
+    _pg_rows.groupby("Maszyna")["Twr_Profil_Glowny"]
+    .agg(lambda s: s.mode().iat[0])
+    .to_dict()
+)
+_bez_kat = sorted(set(df_gantt["Maszyna"].unique()) - set(_masz2pg))
+
+for _pg in sorted(set(_masz2pg.values())):
+    _machs = [m for m, p in _masz2pg.items() if p == _pg]
+    _sub = df_gantt[df_gantt["Maszyna"].isin(_machs)]
+    st.markdown(f"#### 🏷️ {_pg}")
+    st.plotly_chart(_make_gantt(_sub), use_container_width=True, key=f"gantt_{_pg}")
+
+if _bez_kat:
+    _sub = df_gantt[df_gantt["Maszyna"].isin(_bez_kat)]
+    st.markdown("#### 🏷️ Bez kategorii")
+    st.plotly_chart(_make_gantt(_sub), use_container_width=True, key="gantt_bez_kat")
 
 # ── Legenda RAL ────────────────────────────────────────────────────────────────
 with st.expander("🎨 Legenda kolorów"):
