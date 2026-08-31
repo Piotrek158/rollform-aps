@@ -53,15 +53,21 @@ def _crane_first_free(
     t: float,
     dur: float,
 ) -> float:
-    """Najwcześniejszy moment ≥ `t` gdzie okno [start, start+dur] nie koliduje
-    z żadną rezerwacją na danej suwnicy w danym dniu."""
+    """Najwcześniejszy moment ≥ `t` gdy suwnica nie jest zajęta — koniec
+    łańcucha rezerwacji trwających w `t`. Kolejka FIFO: nie szukamy dziury
+    o długości `dur`; wystarczy wolna chwila — wchodzimy z przezbrojeniem,
+    a ewentualna późniejsza rezerwacja innej maszyny w praktyce przesunie
+    się o kilka minut (świadome dopuszczenie nakładek w modelu planu).
+    Maks. czekanie ≈ (pozycja w kolejce) × czas przezbrojenia."""
     busy = sorted(crane_cal.get((key[0], key[1], day.isoformat()), []))
     cand = float(t)
     for bs, be in busy:
-        if cand + dur <= bs:
-            return cand
-        if cand < be:
+        if be <= cand:
+            continue
+        if bs <= cand:
             cand = float(be)
+        else:
+            break  # suwnica wolna w `cand` — wchodzimy, nawet gdy dziura < dur
     return cand
 
 
@@ -693,8 +699,27 @@ def planuj(
 
                         # Przejście między maszynami
                         if prev_masz is not None:
-                            if cursor + TRANSIT_MIN >= sh_end:
+                            arrival = cursor + TRANSIT_MIN
+                            if arrival >= sh_end:
                                 break
+                            # Nie płać 20 min przejścia, jeśli po dojściu nie
+                            # zmieści się już nawet przezbrojenie — chyba że
+                            # katalog na maszynie jest otwarty (0 min setupu)
+                            # albo to ostatnia zmiana dnia (dozwolony zonk).
+                            if not allow_overflow:
+                                _std_p = float(
+                                    maszyny_dict[masz_name].get("czas_przezbrojenia_min", 12) or 12
+                                )
+                                _kand_n = planowalne[
+                                    (planowalne["maszyna"] == masz_name)
+                                    & (~planowalne["Numer_zlecenia"].isin(planned))
+                                ]
+                                _otwarty = (
+                                    last_kat.get(masz_name) is not None
+                                    and (_kand_n["Twr_Katalog"] == last_kat.get(masz_name)).any()
+                                )
+                                if not _otwarty and arrival + _std_p >= sh_end:
+                                    break
                             ts = day_dt + timedelta(minutes=cursor)
                             te = day_dt + timedelta(minutes=cursor + TRANSIT_MIN)
                             gantt_rows.append({
