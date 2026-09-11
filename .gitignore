@@ -24,3 +24,9 @@ image*.png
 *.xlsx
 *.xlsm
 !samples/zlecenia_przykladowe.xlsx
+
+# Lokalna konfiguracja z prawdziwymi danymi + zapisane plany
+backend/config.local.json
+backend/config.json.bak
+backend/plans/*.json
+backend/*.bak

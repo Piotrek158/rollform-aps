@@ -189,7 +189,7 @@ Endpoint `GET /api/proxy/last-programming-orders?machineName=…&top=…` pośre
 
 ## Konfiguracja
 
-`backend/config.json` (edytowany przez UI; zapis atomowy z backupem `.bak`):
+`backend/config.json` (edytowany przez UI; zapis atomowy z backupem `.bak`). Jeśli istnieje `backend/config.local.json`, aplikacja używa jego zamiast wersji z repozytorium — dzięki temu rzeczywiste dane zasobów pozostają poza kontrolą wersji. Operatorzy w konfiguracji repozytoryjnej mają fikcyjne dane osobowe; w repozytorium nie ma też zapisanych planów (`backend/plans/` jest ignorowany).
 
 | Sekcja | Zawartość |
 |---|---|

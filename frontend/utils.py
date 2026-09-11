@@ -24,7 +24,14 @@ class _Encoder(json.JSONEncoder):
             return obj.isoformat()
         return super().default(obj)
 
-CONFIG_PATH = Path(__file__).parent.parent / "backend" / "config.json"
+_BACKEND_DIR = Path(__file__).parent.parent / "backend"
+# Lokalna konfiguracja (poza kontrolą wersji) ma pierwszeństwo przed wersją z repo —
+# pozwala trzymać prawdziwe dane zasobów bez ich commitowania.
+CONFIG_PATH = (
+    _BACKEND_DIR / "config.local.json"
+    if (_BACKEND_DIR / "config.local.json").exists()
+    else _BACKEND_DIR / "config.json"
+)
 BACKUP_PATH = CONFIG_PATH.with_suffix(".json.bak")
 
 
