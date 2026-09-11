@@ -19,3 +19,8 @@ backend/config.json.tmp
 
 # Zrzuty ekranu robocze
 image*.png
+
+# Robocze pliki Excel — w repo tylko wsad przykładowy
+*.xlsx
+*.xlsm
+!samples/zlecenia_przykladowe.xlsx

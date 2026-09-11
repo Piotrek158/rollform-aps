@@ -228,7 +228,7 @@ SILNIK.md                 opis silnika krok po kroku (pseudokod)
 journal.md                dziennik zmian
 ```
 
-Pozostałe pliki xlsx w katalogu głównym to robocze eksporty z kolejnych iteracji (dane wejściowe, plany wynikowe, słowniki prędkości i przypisań profil → maszyna). `base.xlsm` to archiwalny arkusz VBA, na podstawie którego odtworzono logikę referencyjną.
+Repozytorium zawiera wyłącznie kod, konfigurację i jeden wsad przykładowy. Robocze eksporty z ERP, plany wynikowe i archiwalny arkusz VBA, z którego odtworzono logikę referencyjną, są celowo poza kontrolą wersji (`*.xlsx`, `*.xlsm` w `.gitignore`).
 
 ---
 
