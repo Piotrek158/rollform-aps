@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Test endpointu — LastProgrammingProductionOrders</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; }
+    label { display: block; margin-bottom: 4px; font-weight: 600; }
+    input { padding: 8px 10px; font-size: 15px; width: 260px; margin-right: 8px; }
+    button { padding: 8px 18px; font-size: 15px; cursor: pointer; }
+    #wynik { margin-top: 20px; padding: 14px; background: #f4f4f4; border: 1px solid #ddd;
+             border-radius: 6px; white-space: pre-wrap; font-family: Consolas, monospace;
+             font-size: 13px; min-height: 60px; overflow-x: auto; }
+    .err { color: #b00020; }
+  </style>
+</head>
+<body>
+  <h2>Test: LastProgrammingProductionOrders</h2>
+
+  <label for="machineName">Machine name</label>
+  <input id="machineName" type="text" placeholder="np. Z2-T18P">
+  <input id="top" type="number" value="5" min="1" style="width:70px" title="top (ile rekordów)">
+  <button id="btn">Pobierz</button>
+
+  <div id="wynik">— tu pojawi się odpowiedź —</div>
+
+  <script src="test_endpoint.js"></script>
+  <script>
+    const out = document.getElementById("wynik");
+    document.getElementById("btn").addEventListener("click", async () => {
+      const name = document.getElementById("machineName").value.trim();
+      const top  = parseInt(document.getElementById("top").value, 10) || 5;
+      if (!name) { out.textContent = "Podaj nazwę maszyny."; return; }
+      out.classList.remove("err");
+      out.textContent = "Ładowanie…";
+      try {
+        const data = await lastProgrammingOrders(name, top);
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        out.classList.add("err");
+        out.textContent = "Błąd: " + e.message;
+      }
+    });
+  </script>
+</body>
+</html>

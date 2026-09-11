@@ -11,3 +11,11 @@ venv/
 # System
 .DS_Store
 Thumbs.db
+
+# Sekrety i pliki lokalne
+.env
+*.tmp
+backend/config.json.tmp
+
+# Zrzuty ekranu robocze
+image*.png
